@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using HabitBuilder_Backend.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace HabitBuilder_Backend.Areas.Identity.Data
 {
@@ -12,6 +13,9 @@ namespace HabitBuilder_Backend.Areas.Identity.Data
       
         public DateTime DateCreated { get; set; }
         public DateTime DateModified { get; set; }
+        public int Points { get; set; }
        
+     //   public ICollection <UserHabit> UserHabits { get; set; }
+       // public ICollection<Reward> Rewards { get; set; }
     }
 }
