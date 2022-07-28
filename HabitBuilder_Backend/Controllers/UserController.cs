@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text;
 
 namespace HabitBuilder_Backend.Controllers
@@ -39,7 +40,8 @@ namespace HabitBuilder_Backend.Controllers
                 Email = model.Email,
                 UserName = model.Email,
                 DateCreated = DateTime.UtcNow,
-                DateModified = DateTime.UtcNow
+                DateModified = DateTime.UtcNow,
+                
 
             };
             var result = await _userManager.CreateAsync(users, model.Password);
@@ -60,17 +62,7 @@ namespace HabitBuilder_Backend.Controllers
 
 
         }
-        //*********FOR TESTING PURPOSES***********
-
-        //[Authorize(AuthenticationSchemes=JwtBearerDefaults.AuthenticationScheme)]
-        //[HttpGet("AllUsers")]
-        //public async Task <object> AllUsers()
-        //{
-        //    var users = _userManager.Users.Select(x => new UserDTO(x.FirstName, x.LastName, x.Email, x.UserName, x.DateCreated));
-        //    return await Task.FromResult(users);
-
-        //}
-
+    
 
 
         [HttpPost("Login")]
@@ -87,10 +79,10 @@ namespace HabitBuilder_Backend.Controllers
                     {
 
                         var appUser = await _userManager.FindByEmailAsync(model.Email);
-                        var user = new UserDTO(appUser.FirstName, appUser.LastName, appUser.UserName, appUser.Email, appUser.DateCreated);
+                        var user = new UserDTO(appUser.FirstName, appUser.LastName, appUser.Email, appUser.DateCreated);
                         user.Token = GenerateToken(appUser);
                         return await Task.FromResult(user);
-                        //return await Task.FromResult("Login was successful");
+                      
 
                     }
                 }
@@ -110,7 +102,44 @@ namespace HabitBuilder_Backend.Controllers
 
         }
 
-     
+        //Get Profile Data/Delete/Update 
+        [HttpGet("Profile")]
+        [Authorize]
+        public async Task<IActionResult> GetProfile()
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+
+         
+            var users = await _userManager.FindByIdAsync(currentUser.Id);
+            var user = new UserDTO(users.FirstName, users.LastName, users.Email, users.DateCreated);
+           
+ 
+
+            return new OkObjectResult(user);
+        }
+
+        [HttpPut("Profile/Modify")]
+
+        [Authorize]
+        public async Task<IActionResult> PutProfile(AppUser appUser)
+        {
+           // var currentUser = await _userManager.GetUserAsync(User);
+
+            var users = await _userManager.FindByIdAsync(appUser.Id);
+            new UserDTO(users.FirstName, users.LastName, users.Email, users.DateCreated);
+            var result = await _userManager.UpdateAsync(users);
+            if (result.Succeeded)
+            {
+                return new OkObjectResult(users);
+
+            }
+            return new OkObjectResult("Failed to update");
+
+        }
+
+        //calculate points
+
+        //Subscribe to other users/remove
         private string GenerateToken(AppUser user)
         {
             var jwtTokenHandler = new JwtSecurityTokenHandler();
