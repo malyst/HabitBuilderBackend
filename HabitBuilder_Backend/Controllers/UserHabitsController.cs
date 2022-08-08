@@ -30,16 +30,18 @@ namespace HabitBuilder_Backend.Controllers
 
         // GET: api/UserHabits/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<UserHabit>> GetUserHabit(int id)
+        public async Task<ActionResult<IEnumerable<UserHabit>>> GetUserHabit(string id)
         {
-            var userHabit = await _context.UserHabits.FindAsync(id);
+            var userHabits = await _context.UserHabits.Where(h => h.UserId == id).ToListAsync();
+            //var userHabit = await _context.UserHabits.FindAsync(id);
+            
 
-            if (userHabit == null)
+            if (userHabits == null)
             {
                 return NotFound();
             }
 
-            return userHabit;
+            return userHabits;
         }
 
         // PUT: api/UserHabits/5

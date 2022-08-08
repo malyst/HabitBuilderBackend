@@ -16,15 +16,12 @@ namespace HabitBuilder_Backend.Controllers
     [Route("api/[controller]")]
     public class UserController : ControllerBase
     {
-
-
-        
+ 
         private readonly UserManager<AppUser> _userManager;
         private readonly SignInManager<AppUser> _signInManager;
         private readonly JWTConfig _jwtConfig;
         public UserController( UserManager<AppUser> userManager, SignInManager<AppUser> signInManager, IOptions<JWTConfig> jwtConfig)
         {
-        
             _userManager = userManager;
             _signInManager = signInManager;
             _jwtConfig = jwtConfig.Value; 
@@ -40,31 +37,18 @@ namespace HabitBuilder_Backend.Controllers
                 Email = model.Email,
                 UserName = model.Email,
                 DateCreated = DateTime.UtcNow,
-                DateModified = DateTime.UtcNow,
-                
-
+                DateModified = DateTime.UtcNow,                
             };
             var result = await _userManager.CreateAsync(users, model.Password);
 
             if (result.Succeeded)
             {
-
                 return await Task.FromResult("User has been Registered");
-
-
             }
             //If result does not succeed give description of errors.
             return await Task.FromResult(string.Join(",", result.Errors.Select(x => x.Description).ToArray()));
-
-
-
-
-
-
         }
     
-
-
         [HttpPost("Login")]
         public async Task<object> Login([FromBody] Login model)
         {
@@ -75,19 +59,14 @@ namespace HabitBuilder_Backend.Controllers
                     var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, false, false);
 
                     if (result.Succeeded)
-
                     {
-
                         var appUser = await _userManager.FindByEmailAsync(model.Email);
                         var user = new UserDTO(appUser.FirstName, appUser.LastName, appUser.Email, appUser.DateCreated);
                         user.Token = GenerateToken(appUser);
-                        return await Task.FromResult(user);
-                      
-
+                        return await Task.FromResult(user);                    
                     }
                 }
                 return await Task.FromResult("Invalid Email or Password");
-
             }
 
 
@@ -96,10 +75,6 @@ namespace HabitBuilder_Backend.Controllers
                 return await Task.FromResult(ex.Message);
             }
 
-
-
-
-
         }
 
         //Get Profile Data/Delete/Update 
@@ -107,14 +82,9 @@ namespace HabitBuilder_Backend.Controllers
         [Authorize]
         public async Task<IActionResult> GetProfile()
         {
-            var currentUser = await _userManager.GetUserAsync(User);
-
-         
+            var currentUser = await _userManager.GetUserAsync(User);      
             var users = await _userManager.FindByIdAsync(currentUser.Id);
-            var user = new UserDTO(users.FirstName, users.LastName, users.Email, users.DateCreated);
-           
- 
-
+            var user = new UserDTO(users.FirstName, users.LastName, users.Email, users.DateCreated);        
             return new OkObjectResult(user);
         }
 
